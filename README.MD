@@ -21,8 +21,8 @@
    - 选择一个Empty Activity
    - 在C++ Support中勾选 **-fexception**和 **-frtti**
 4. 导入OpenCV Library Module   
-   -  New -> Import Module
-   -  选择$(OpenCV for android SDK 所在目录)/sdk/java
+   - New -> Import Module
+   - 选择$(OpenCV for android SDK 所在目录)/sdk/java
    - 一路next即可
 5. 修改OpenCV Library Module的build.gradle和你的app的build.gradle一致   
 例如：我的工程的的app的build.gradle的如下:
