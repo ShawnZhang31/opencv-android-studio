@@ -14,6 +14,10 @@ extern "C" JNIEXPORT jstring JNICALL Java_com_seventythree_cvtest_MainActivity_s
     return env->NewStringUTF(hello.c_str());
 }
 
+/**
+ * @brief 使用Canndy算子检测图像中的对象轮廓
+ * @param matAddrGray, Mat图像的内存地址
+ */
 extern "C" JNIEXPORT void JNICALL Java_com_seventythree_cvtest_MainActivity_CanndyDetect(
         JNIEnv *env,
         jobject thiz,
