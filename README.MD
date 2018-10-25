@@ -1,9 +1,9 @@
 # OpenCV Android Studio
 在Android Studio工程中使用Native的方式集成OpenCV
-## 为什么要使用Native方式集成OpenCV  
-如果我们要处理的图片计算量不大，或者对处理速度不关注的时候，我们完全可以采用Java的来调用OpenCV。采用Java来调用OpenCV的集成方法非常简单，具体集成方法可以参考我的这个教程：https://panxsoft.coding.net/s/89438a3d-52b9-47e6-9c6b-23841f86cd8f   
+## 为什么要使用Native方式集成OpenCV  
+如果我们要处理的图片计算量不大，或者对处理速度不关注的时候，我们完全可以采用Java的来调用OpenCV。采用Java来调用OpenCV的集成方法非常简单，具体集成方法可以参考我的这个教程：https://panxsoft.coding.net/s/89438a3d-52b9-47e6-9c6b-23841f86cd8f   
 
-但是如果我们要进行实时处理，或者需要和其他的视觉库一起来使用，那么Java的处理方式就比较不友好了或者效率也不行（虽然OpenCV最终都是在C/C++上执行的，但是直接用C/C++来开发关键算法，明显会使得app的运行效率大大提升）。为了更快的执行效率，或者更好的与其他的视觉库融合，推荐采用Native的融合方式。
+但是如果我们要进行实时处理，或者需要和其他的视觉库一起来使用，那么Java的处理方式就比较不友好了或者效率也不行（虽然OpenCV最终都是在C/C++上执行的，但是直接用C/C++来开发关键算法，明显会使得app的运行效率大大提升）。为了更快的执行效率，或者更好的与其他的视觉库融合，推荐采用Native的融合方式。
 ## 环境
 - Android Studio 3.2.1
 - NDK R16C
@@ -11,11 +11,11 @@
 - CMAKE 3.6.4
 ## 注意
 1. 关于NDK的安装  
- 在国内由于网络的原因有时候通过Android Studio下载NDK的时候会造成下载不得部分文件缺失，这样NDK安装时候成功就不知道，在编译的时候回出现莫名其妙的错误(**我就被这种错误深深的坑过**)。所以安装NDK最好的办法是在Android官网上下载完整的安装包再解压到自己的电脑上。并在Android Studio中设置NDK的目录。
+ 在国内由于网络的原因有时候通过Android Studio下载NDK的时候会造成下载不得部分文件缺失，这样NDK安装时候成功就不知道，在编译的时候回出现莫名其妙的错误(**我就被这种错误深深的坑过**)。所以安装NDK最好的办法是在Android官网上下载完整的安装包再解压到自己的电脑上。并在Android Studio中设置NDK的目录。
 ## 工程配置
 1. 更新Android SDK并安装NDK
-2. 下载OpenCV SDK的Android版本   
- 去OpenCV官网下载OpenCV的Android版本:https://opencv.org/
+2. 下载OpenCV SDK的Android版本   
+ 去OpenCV官网下载OpenCV的Android版本:https://opencv.org/
 3. 创建一个新的Android Studio工程  
    - 选择**Include C++ Support**
    - 选择一个Empty Activity
@@ -23,9 +23,9 @@
 4. 导入OpenCV Library Module   
    -  New -> Import Module
    -  选择$(OpenCV for android SDK 所在目录)/sdk/java
-   - 一路next即可
-5. 修改OpenCV Library Module的build.gradle和你的app的build.gradle一致   
-例如：我的工程的的app的build.gradle的如下:
+   - 一路next即可
+5. 修改OpenCV Library Module的build.gradle和你的app的build.gradle一致   
+例如：我的工程的的app的build.gradle的如下:
 ```gradle
  compileSdkVersion 28
     defaultConfig {
@@ -33,7 +33,7 @@
         targetSdkVersion 28
     }
 ```
-则应该将opencv library的build.gradle也修改为与app的build.gradle一致。下面是我修改之后
+则应该将opencv library的build.gradle也修改为与app的build.gradle一致。下面是我修改之后
 ```gradle
 android {
     compileSdkVersion 28 //与app的build.gradle一致
@@ -52,16 +52,16 @@ android {
     }
 }
 ```
-6. 在 app module dependency中添加OpenCV Module  
+6. 在 app module dependency中添加OpenCV Module  
 File -> Project structure -> Module app -> Dependencies tab -> New module dependency -> choose OpenCV library module
-7. 在工程的app/src/main目录下创建名为**jniLibs**的文件夹，并将$(OpenCV for android SDK 所在目录)/sdk/native/libs下面的文件夹拷贝到该文件夹路径下   
+7. 在工程的app/src/main目录下创建名为**jniLibs**的文件夹，并将$(OpenCV for android SDK 所在目录)/sdk/native/libs下面的文件夹拷贝到该文件夹路径下   
 为了是最终打包的APK尽可能的小，可以只拷贝对应ABI的文件.
 8. 将(OpenCV for android SDK 所在目录)/sdk/native/jni/include文件夹拷贝到app/src/main/cpp文件下    
-   - 网上也有人说不用拷贝，在 **CMakeLists.txt** 设置就行了，但是我实际这样操作话会出现莫名其妙的错误，目前还不知道错误原因，等弄明白了再更新
-   - 如果在创建Android Studio工程的时候选择**Include C++ Support**，则在app/src/main文件夹下面会自动出现cpp文件夹。如果是自己手工添加C++ Support的话，存放C++文件的文件夹是自己定义的，总之就是将include文件放在你存放C++文件的文件夹下.
+   - 网上也有人说不用拷贝，在 **CMakeLists.txt** 设置就行了，但是我实际这样操作话会出现莫名其妙的错误，目前还不知道错误原因，等弄明白了再更新
+   - 如果在创建Android Studio工程的时候选择**Include C++ Support**，则在app/src/main文件夹下面会自动出现cpp文件夹。如果是自己手工添加C++ Support的话，存放C++文件的文件夹是自己定义的，总之就是将include文件放在你存放C++文件的文件夹下.
 9. 配置**CMakeLists.txt**文件  
  配置**CMakeLists.txt**有两种方法，选择一种适合你自己的   
-   - 第一种：这种方式比较简单，一般不会出现什么错误，但是打包的*.so文件会稍微大一点，初学者推荐始终这种配置方式
+   - 第一种：这种方式比较简单，一般不会出现什么错误，但是打包的*.so文件会稍微大一点，初学者推荐始终这种配置方式
       ```CMake
       cmake_minimum_required(VERSION 3.4.1)
 
@@ -115,7 +115,7 @@ File -> Project structure -> Module app -> Dependencies tab -> New module depend
         # included in the NDK.
         ${log-lib} )
       ```
-   - 第二种：将opencv中的*.so文件一个一个指定打包。这种方法可以最大限度的减少打包的*.so文件的大小。但是对于OpenCV有一定的要求，初学者不建议采用这种配置方式。
+   - 第二种：将opencv中的*.so文件一个一个指定打包。这种方法可以最大限度的减少打包的*.so文件的大小。但是对于OpenCV有一定的要求，初学者不建议采用这种配置方式。
       ```CMake
       # NDK的最小版本
       cmake_minimum_required(VERSION 3.4.1)
@@ -224,7 +224,7 @@ File -> Project structure -> Module app -> Dependencies tab -> New module depend
           ${log-lib}
           )
       ``` 
-10. 如何指定编译的ABI可以在app的build.gradle中指定   
+10. 如何指定编译的ABI可以在app的build.gradle中指定   
 ```Gradle
 apply plugin: 'com.android.application'
 
@@ -273,9 +273,9 @@ dependencies {
 }
 ```
 ## Demo检查
-要检查我们是否配置成功，可以先Build一下，如果一切正常则配置成功。否则根据提示修正错误即可。如果一切正常，我们来做一个从工程：打开摄像头并使用OpenCV提供Canndy算子来检测摄像头画面中对象轮廓。效果图如下：   
+要检查我们是否配置成功，可以先Build一下，如果一切正常则配置成功。否则根据提示修正错误即可。如果一切正常，我们来做一个从工程：打开摄像头并使用OpenCV提供Canndy算子来检测摄像头画面中对象轮廓。效果图如下：   
 [效果图](README_Files/device.png)   
-1. 为app的AndroidManifest.xml文件添加摄像头访问权限  
+1. 为app的AndroidManifest.xml文件添加摄像头访问权限  
    ```xml
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera"/>
@@ -329,7 +329,7 @@ dependencies {
        Canny(grayMat, grayMat, 50, 100);
    }
    ```
-4. 修改MainActivity.java
+4. 修改MainActivity.java
 ```Java
 package com.你自己的包名;
 
