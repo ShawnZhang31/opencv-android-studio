@@ -508,3 +508,103 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 }
 
 ```
+## 常见问题
+### 1. OpenCV JavaCameraView的画面旋转问题    
+ 这是由于OpenCV的SDK中的JavaViewCamera.java中未对屏幕方向进行处理的原型。可以自己写适配屏幕方向的方法，这里仅以portrait为例演示如何旋转摄像头画面旋转90°的方法
+1. 首先采用反射的方法在JavaCameraView类中添加旋转摄像头的方法
+```java
+    /**
+     * 使用仿射的方法调用摄像头的旋转方法
+     * @param camera 摄像头对象
+     * @param angle 旋转角度，逆时针为正，顺时针为负
+     */
+    protected void setDisplayOrientation(Camera camera, int angle)
+    {
+        Method downPolymorphic;
+        try {
+            downPolymorphic = camera.getClass().getMethod("setDisplayOrientation", new Class[]{int.class});
+            if (downPolymorphic != null)
+                downPolymorphic.invoke(camera, new Object[]{angle});
+        } catch (Exception e1) {
+        }
+    }
+```
+2. 修改JavaCameraView类的initializeCamera方法
+   首先定位到initializeCamera方法中如下代码块
+```java
+    /* Finally we are ready to start the preview */
+                   Log.d(TAG, "startPreview");
+                   
+                   mCamera.startPreview();
+ ```    
+ 将上面的代码块修改成如下样子    
+ ```java
+                    /* Finally we are ready to start the preview */
+                    Log.d(TAG, "startPreview");
+
+                    // 修正摄像头画面 Added By shawnzhang
+                    //  mCamera.setDisplayOrientation(90);    // 不采用仿射的方法
+                    setDisplayOrientation(mCamera, 90);     //旋转摄像头
+                    mCamera.setPreviewDisplay(getHolder());     // 刷新Canvas
+                    // 修正摄像头画面 Added By shawnzhang
+
+                    mCamera.startPreview();
+```
+此时摄像头画面就在portrait方式下正常了，当然你也可以不采用反射的方法，直接采用注释掉的方法来处理，不过OpenCV的Java源码多采用反射的处理方式，这样做也是符合OpenCV的方式而已。
+
+### 2. OpenCV的摄像头预览画面变形   
+默认情况下使用JavaCameraView直接打开摄像头的画面是变形的，这是由于JavaCameraView类的initializeCamera方法中调用的calculateCameraFrameSize方法的问题，OpenCV的原始代码如下：
+```java
+                if (sizes != null) {
+                    /* Select the size that fits surface considering maximum size allowed */
+                    Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
+
+                    /* Image format NV21 causes issues in the Android emulators */
+                    if (Build.FINGERPRINT.startsWith("generic")
+```
+calculateCameraFrameSize在CameraBridgeViewBase.java中实现，参数sizes是摄像头支持的previewSize, 参数width和height是显示摄像头画面的Frame的宽和高，由调用initializeCamera方法的对象传入，
+这样计算最佳FrameSize的参数都有了。在JavaViewCamera中创建一个根据摄像头支持的previewSize和显示摄像头画面的SurefaceView选择最佳FrameSize的方法，代码如下:
+```java
+ /**
+     * 根据显示摄像头画面的SurfaceView的尺寸选择最合适的FrameSize
+     * @param supportedSizes 摄像头支持的previewSize列表
+     * @param surfaceWidth 显示摄像头画面的SurfaceView的宽度
+     * @param surfaceHeight 显示摄像头画面的SurfaceView的高度
+     * @return 注意返回值的Size采用的是org.opencv.core.Size 而不是android.haraware.Camera.Size
+     */
+    private Size getBestCameraFrameSize(List<android.hardware.Camera.Size> supportedSizes,int surfaceWidth, int surfaceHeight)
+    {
+
+        float tmp = 0.0f;
+        float minDiff = 100.0f;
+        int bestWidth = 0;
+        int bestHeight = 0;
+        float x_d_y = (float)surfaceWidth/(float)surfaceHeight;
+        Size best = null;
+        for (android.hardware.Camera.Size size : supportedSizes)
+        {
+            tmp = Math.abs(((float)size.height/(float)size.width)-x_d_y);
+            if (tmp < minDiff)
+            {
+                minDiff = tmp;
+                bestWidth = size.width;
+                bestHeight = size.height;
+            }
+        }
+
+        return  new Size(bestWidth, bestHeight);
+    }
+```
+然后修改initializeCamera方法中计算最佳FrameSize的代码块如下所示:
+```java
+                if (sizes != null) {
+                    /* Select the size that fits surface considering maximum size allowed */
+//                    Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
+
+                    // 选择最适合的Frame的Size  Add By Shawnzhang
+                    Size frameSize = getBestCameraFrameSize(sizes, width, height);
+                    // 选择最适合的Frame的Size  Add By Shawnzhang
+
+                    /* Image format NV21 causes issues in the Android emulators */
+                    if (Build.FINGERPRINT.startsWith("generic")
+```
