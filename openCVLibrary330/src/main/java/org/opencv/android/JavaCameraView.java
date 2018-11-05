@@ -1,5 +1,6 @@
 package org.opencv.android;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import android.content.Context;
@@ -144,7 +145,11 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                 if (sizes != null) {
                     /* Select the size that fits surface considering maximum size allowed */
-                    Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
+//                    Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
+
+                    // 选择最适合的Frame的Size  Add By Shawnzhang
+                    Size frameSize = getBestCameraFrameSize(sizes, width, height);
+                    // 选择最适合的Frame的Size  Add By Shawnzhang
 
                     /* Image format NV21 causes issues in the Android emulators */
                     if (Build.FINGERPRINT.startsWith("generic")
@@ -213,6 +218,13 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     /* Finally we are ready to start the preview */
                     Log.d(TAG, "startPreview");
+
+                    // 修正摄像头画面 Added By shawnzhang
+                    //  mCamera.setDisplayOrientation(90);    // 不采用仿射的方法
+                    setDisplayOrientation(mCamera, 90);     //旋转摄像头
+                    mCamera.setPreviewDisplay(getHolder());     // 刷新Canvas
+                    // 修正摄像头画面 Added By shawnzhang
+
                     mCamera.startPreview();
                 }
                 else
@@ -224,6 +236,52 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         }
 
         return result;
+    }
+
+    /**
+     * 使用反射的方法调用摄像头的旋转方法
+     * @param camera 摄像头对象
+     * @param angle 旋转角度，逆时针为正，顺时针为负
+     */
+    private void  setDisplayOrientation(Camera camera, int angle)
+    {
+        Method downPolymorphic;
+        try {
+            downPolymorphic = camera.getClass().getMethod("setDisplayOrientation", new Class[]{int.class});
+            if (downPolymorphic != null)
+                downPolymorphic.invoke(camera, new Object[]{angle});
+        }catch (Exception e1)
+        {}
+    }
+
+    /**
+     * 根据显示摄像头画面的SurfaceView的尺寸选择最合适的FrameSize
+     * @param supportedSizes 摄像头支持的previewSize列表
+     * @param surfaceWidth 显示摄像头画面的SurfaceView的宽度
+     * @param surfaceHeight 显示摄像头画面的SurfaceView的高度
+     * @return 注意返回值的Size采用的是org.opencv.core.Size 而不是android.haraware.Camera.Size
+     */
+    private Size getBestCameraFrameSize(List<android.hardware.Camera.Size> supportedSizes,int surfaceWidth, int surfaceHeight)
+    {
+
+        float tmp = 0.0f;
+        float minDiff = 100.0f;
+        int bestWidth = 0;
+        int bestHeight = 0;
+        float x_d_y = (float)surfaceWidth/(float)surfaceHeight;
+        Size best = null;
+        for (android.hardware.Camera.Size size : supportedSizes)
+        {
+            tmp = Math.abs(((float)size.height/(float)size.width)-x_d_y);
+            if (tmp < minDiff)
+            {
+                minDiff = tmp;
+                bestWidth = size.width;
+                bestHeight = size.height;
+            }
+        }
+
+        return  new Size(bestWidth, bestHeight);
     }
 
     protected void releaseCamera() {
