@@ -510,6 +510,7 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 ```
 ## 常见问题
 ### 1. OpenCV JavaCameraView的画面旋转问题    
+ **今天晚上突然发现一个很严重的问题，使用本方法修改之后onCameraFrame中的Mat突然无法与布局中的JavaCameraView绑定了，具体原因正在排查中...**
  这是由于OpenCV的SDK中的JavaViewCamera.java中未对屏幕方向进行处理的原型。可以自己写适配屏幕方向的方法，这里仅以portrait为例演示如何旋转摄像头画面旋转90°的方法
 1. 首先采用反射的方法在JavaCameraView类中添加旋转摄像头的方法
 ```java
