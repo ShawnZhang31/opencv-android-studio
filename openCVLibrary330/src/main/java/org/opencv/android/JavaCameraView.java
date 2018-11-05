@@ -245,13 +245,12 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
      */
     private void  setDisplayOrientation(Camera camera, int angle)
     {
-        Method downPolymorphic;
+        Method setOrientation;
         try {
-            downPolymorphic = camera.getClass().getMethod("setDisplayOrientation", new Class[]{int.class});
-            if (downPolymorphic != null)
-                downPolymorphic.invoke(camera, new Object[]{angle});
-        }catch (Exception e1)
-        {}
+            setOrientation = camera.getClass().getMethod("setDisplayOrientation", new Class[]{int.class});
+            if (setOrientation != null)
+                setOrientation.invoke(camera, new Object[]{angle});
+        }catch (Exception e1) {}
     }
 
     /**

@@ -514,19 +514,18 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 1. 首先采用反射的方法在JavaCameraView类中添加旋转摄像头的方法
 ```java
     /**
-     * 使用仿射的方法调用摄像头的旋转方法
+     * 使用反射的方法调用摄像头的旋转方法
      * @param camera 摄像头对象
      * @param angle 旋转角度，逆时针为正，顺时针为负
      */
-    protected void setDisplayOrientation(Camera camera, int angle)
+    private void  setDisplayOrientation(Camera camera, int angle)
     {
-        Method downPolymorphic;
+        Method setOrientation;
         try {
-            downPolymorphic = camera.getClass().getMethod("setDisplayOrientation", new Class[]{int.class});
-            if (downPolymorphic != null)
-                downPolymorphic.invoke(camera, new Object[]{angle});
-        } catch (Exception e1) {
-        }
+            setOrientation = camera.getClass().getMethod("setDisplayOrientation", new Class[]{int.class});
+            if (setOrientation != null)
+                setOrientation.invoke(camera, new Object[]{angle});
+        }catch (Exception e1) {}
     }
 ```
 2. 修改JavaCameraView类的initializeCamera方法
